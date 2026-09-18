@@ -75,34 +75,58 @@ def get_marking_keyboard() -> InlineKeyboardMarkup:
 
 def get_quiz_intro_keyboard(quiz_code: str, bot_username: str = "", lang: str = "en") -> InlineKeyboardMarkup:
     """Keyboard shown before starting a quiz attempt with option to start in group."""
+    from app.utils.branding import get_promo_keyboard_row
     clean_bot = bot_username.lstrip("@") if bot_username else "akaxxh_bot"
     group_url = f"https://t.me/{clean_bot}?startgroup=quiz_{quiz_code}"
     keyboard = [
         [InlineKeyboardButton(f"▶️ {t('btn_start_quiz', lang)}", callback_data=f"start_attempt:{quiz_code}")],
-        [InlineKeyboardButton(f"👥 {t('btn_share_group', lang)}", url=group_url)]
+        [InlineKeyboardButton(f"👥 {t('btn_share_group', lang)}", url=group_url)],
+        get_promo_keyboard_row()
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_quiz_created_keyboard(quiz_code: str, bot_username: str = "") -> InlineKeyboardMarkup:
+    """Keyboard shown immediately after quiz creation matching Image 2."""
+    clean_bot = (bot_username or settings.BOT_USERNAME or "akaxxh_bot").lstrip("@")
+    group_url = f"https://t.me/{clean_bot}?startgroup=quiz_{quiz_code}"
+    keyboard = [
+        [InlineKeyboardButton("Start this quiz", callback_data=f"start_attempt:{quiz_code}")],
+        [InlineKeyboardButton("Start quiz in group ➕", url=group_url)],
+        [InlineKeyboardButton("Share quiz ↗️", switch_inline_query=f"quiz:{quiz_code}")],
+        [InlineKeyboardButton("Edit quiz", callback_data=f"edit_quiz:{quiz_code}")],
+        [InlineKeyboardButton("Quiz stats", callback_data=f"stats:{quiz_code}")]
+    ]
+    return InlineKeyboardMarkup(keyboard)
+
+
+def get_group_ready_keyboard(quiz_code: str, ready_count: int = 0) -> InlineKeyboardMarkup:
+    """Ready button for group quiz starting flow with live participant count."""
+    from app.utils.branding import get_promo_keyboard_row
+    label = f"✋ I'm ready! ({ready_count})" if ready_count > 0 else "✋ I'm ready!"
+    keyboard = [
+        [InlineKeyboardButton(label, callback_data=f"grp_ready:{quiz_code}")],
+        get_promo_keyboard_row()
     ]
     return InlineKeyboardMarkup(keyboard)
 
 
 def get_group_intro_keyboard(quiz_code: str) -> InlineKeyboardMarkup:
     """Keyboard shown in group before launching the quiz."""
-    keyboard = [
-        [InlineKeyboardButton("▶️ Start Quiz Now", callback_data=f"start_grp:{quiz_code}")]
-    ]
-    return InlineKeyboardMarkup(keyboard)
+    return get_group_ready_keyboard(quiz_code, ready_count=0)
 
 
 def get_quiz_result_keyboard(quiz_code: str, bot_username: str, lang: str = "en") -> InlineKeyboardMarkup:
     """Keyboard shown upon quiz completion."""
+    from app.utils.branding import get_promo_keyboard_row
     clean_bot = bot_username.lstrip("@")
-    deep_link = f"https://t.me/{clean_bot}?start=quiz_{quiz_code}"
-    share_url = f"https://t.me/share/url?url={deep_link}&text=Can%20you%20beat%20my%20score%20on%20this%20NEET%20Quiz?"
     group_url = f"https://t.me/{clean_bot}?startgroup=quiz_{quiz_code}"
 
     keyboard = [
         [InlineKeyboardButton(f"🔄 {t('btn_try_again', lang)}", callback_data=f"start_attempt:{quiz_code}")],
-        [InlineKeyboardButton(f"📤 {t('btn_share_quiz', lang)}", url=share_url)],
+        [InlineKeyboardButton("📤 Share quiz ↗️", switch_inline_query=f"quiz:{quiz_code}")],
         [InlineKeyboardButton(f"👥 {t('btn_share_group', lang)}", url=group_url)],
+        get_promo_keyboard_row(),
         [InlineKeyboardButton(f"🏠 {t('btn_back', lang)}", callback_data="cmd:start")]
     ]
     return InlineKeyboardMarkup(keyboard)
@@ -110,14 +134,10 @@ def get_quiz_result_keyboard(quiz_code: str, bot_username: str, lang: str = "en"
 
 def get_quiz_item_keyboard(quiz_code: str, bot_username: str, lang: str = "en") -> InlineKeyboardMarkup:
     """Keyboard for an individual quiz in the /quizzes list."""
-    clean_bot = bot_username.lstrip("@")
-    deep_link = f"https://t.me/{clean_bot}?start=quiz_{quiz_code}"
-    share_url = f"https://t.me/share/url?url={deep_link}&text=Try%20this%20NEET%20Quiz!"
-
     keyboard = [
         [
             InlineKeyboardButton("▶️ Start", callback_data=f"start_attempt:{quiz_code}"),
-            InlineKeyboardButton("📤 Share", url=share_url),
+            InlineKeyboardButton("📤 Share ↗️", switch_inline_query=f"quiz:{quiz_code}"),
             InlineKeyboardButton("📊 Stats", callback_data=f"stats:{quiz_code}")
         ]
     ]

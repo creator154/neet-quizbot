@@ -1,4 +1,4 @@
-﻿"""Bot application builder and handler setup."""
+"""Bot application builder and handler setup."""
 
 from telegram import BotCommand
 from telegram.ext import (
@@ -8,6 +8,7 @@ from telegram.ext import (
     MessageHandler,
     PollAnswerHandler,
     CallbackQueryHandler,
+    InlineQueryHandler,
     filters
 )
 from app.config import settings
@@ -25,8 +26,10 @@ from app.bot.handlers import (
     handle_creation_text,
     handle_prequestion_media,
     handle_native_poll_received,
+    handle_quiz_share_command,
     handle_poll_answer,
-    handle_callback_query
+    handle_callback_query,
+    handle_inline_query
 )
 from app.utils.logger import logger
 
@@ -61,6 +64,7 @@ def create_bot_application() -> Application:
     app.add_handler(CommandHandler("newquiz", newquiz_command))
     app.add_handler(CommandHandler("quizzes", quizzes_command))
     app.add_handler(CommandHandler("myquizzes", quizzes_command))
+    app.add_handler(CommandHandler("quiz", handle_quiz_share_command))
     app.add_handler(CommandHandler("undo", undo_command))
     app.add_handler(CommandHandler("done", done_command))
     app.add_handler(CommandHandler("cancel", cancel_command))
@@ -88,5 +92,8 @@ def create_bot_application() -> Application:
 
     # 6. Inline keyboard callback handler
     app.add_handler(CallbackQueryHandler(handle_callback_query))
+
+    # 7. Inline query handler for rich quiz sharing (@bot quiz:CODE)
+    app.add_handler(InlineQueryHandler(handle_inline_query))
 
     return app
