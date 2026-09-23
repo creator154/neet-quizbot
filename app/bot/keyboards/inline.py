@@ -1,15 +1,24 @@
 """Inline keyboards for menus, settings, attempts, and results."""
 
 from typing import List, Optional
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
-from app.utils.localization import t
 
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup
+
+from app.utils.localization import t
 from app.config import settings
 
 
-def get_start_keyboard(bot_username: str = "", lang: str = "en") -> InlineKeyboardMarkup:
+def get_start_keyboard(
+    bot_username: str = "",
+    lang: str = "en"
+) -> InlineKeyboardMarkup:
     """Home /start inline menu."""
-    clean_bot = (bot_username or settings.BOT_USERNAME or "akaxxh_bot").lstrip("@")
+
+    clean_bot = (
+        bot_username
+        or settings.BOT_USERNAME
+        or "akaxxh_bot"
+    ).lstrip("@")
 
     keyboard = [
         [
@@ -27,7 +36,7 @@ def get_start_keyboard(bot_username: str = "", lang: str = "en") -> InlineKeyboa
         [
             InlineKeyboardButton(
                 "Developer",
-                callback_data="open_developer"
+                url="https://t.me/akaxxh"
             ),
             InlineKeyboardButton(
                 "Help",
@@ -37,7 +46,7 @@ def get_start_keyboard(bot_username: str = "", lang: str = "en") -> InlineKeyboa
         [
             InlineKeyboardButton(
                 "Support",
-                callback_data="open_support"
+                url="https://t.me/SuperQuizUpdates"
             )
         ]
     ]
@@ -47,6 +56,7 @@ def get_start_keyboard(bot_username: str = "", lang: str = "en") -> InlineKeyboa
 
 def get_timer_keyboard() -> InlineKeyboardMarkup:
     """Timer selection keyboard per question with 45s and minute formatting."""
+
     keyboard = [
         [
             InlineKeyboardButton("10 seconds", callback_data="timer:10"),
@@ -68,11 +78,13 @@ def get_timer_keyboard() -> InlineKeyboardMarkup:
             InlineKeyboardButton("No Timer", callback_data="timer:0")
         ]
     ]
+
     return InlineKeyboardMarkup(keyboard)
 
 
 def get_shuffle_keyboard() -> InlineKeyboardMarkup:
     """Shuffle selection keyboard."""
+
     keyboard = [
         [
             InlineKeyboardButton(
@@ -99,11 +111,13 @@ def get_shuffle_keyboard() -> InlineKeyboardMarkup:
             )
         ]
     ]
+
     return InlineKeyboardMarkup(keyboard)
 
 
 def get_marking_keyboard() -> InlineKeyboardMarkup:
-    """Marking scheme selection keyboard (+4/-1, +1/-0.33, +1/0)."""
+    """Marking scheme selection keyboard."""
+
     keyboard = [
         [
             InlineKeyboardButton(
@@ -124,6 +138,7 @@ def get_marking_keyboard() -> InlineKeyboardMarkup:
             )
         ]
     ]
+
     return InlineKeyboardMarkup(keyboard)
 
 
@@ -132,11 +147,19 @@ def get_quiz_intro_keyboard(
     bot_username: str = "",
     lang: str = "en"
 ) -> InlineKeyboardMarkup:
-    """Keyboard shown before starting a quiz attempt with option to start in group."""
+    """Keyboard shown before starting a quiz attempt."""
+
     from app.utils.branding import get_promo_keyboard_row
 
-    clean_bot = bot_username.lstrip("@") if bot_username else "akaxxh_bot"
-    group_url = f"https://t.me/{clean_bot}?startgroup=quiz_{quiz_code}"
+    clean_bot = (
+        bot_username.lstrip("@")
+        if bot_username
+        else "akaxxh_bot"
+    )
+
+    group_url = (
+        f"https://t.me/{clean_bot}?startgroup=quiz_{quiz_code}"
+    )
 
     keyboard = [
         [
@@ -162,11 +185,16 @@ def get_quiz_created_keyboard(
     bot_username: str = ""
 ) -> InlineKeyboardMarkup:
     """Keyboard shown immediately after quiz creation."""
+
     clean_bot = (
-        bot_username or settings.BOT_USERNAME or "akaxxh_bot"
+        bot_username
+        or settings.BOT_USERNAME
+        or "akaxxh_bot"
     ).lstrip("@")
 
-    group_url = f"https://t.me/{clean_bot}?startgroup=quiz_{quiz_code}"
+    group_url = (
+        f"https://t.me/{clean_bot}?startgroup=quiz_{quiz_code}"
+    )
 
     keyboard = [
         [
@@ -204,8 +232,11 @@ def get_quiz_created_keyboard(
     return InlineKeyboardMarkup(keyboard)
 
 
-def get_edit_quiz_keyboard(quiz_code: str) -> InlineKeyboardMarkup:
+def get_edit_quiz_keyboard(
+    quiz_code: str
+) -> InlineKeyboardMarkup:
     """Dashboard keyboard for editing an existing quiz."""
+
     keyboard = [
         [
             InlineKeyboardButton(
@@ -250,8 +281,11 @@ def get_edit_quiz_keyboard(quiz_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
-def get_edit_timer_keyboard(quiz_code: str) -> InlineKeyboardMarkup:
+def get_edit_timer_keyboard(
+    quiz_code: str
+) -> InlineKeyboardMarkup:
     """Timer selection keyboard when editing a quiz."""
+
     keyboard = [
         [
             InlineKeyboardButton(
@@ -316,8 +350,11 @@ def get_edit_timer_keyboard(quiz_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
-def get_edit_shuffle_keyboard(quiz_code: str) -> InlineKeyboardMarkup:
+def get_edit_shuffle_keyboard(
+    quiz_code: str
+) -> InlineKeyboardMarkup:
     """Shuffle selection keyboard when editing a quiz."""
+
     keyboard = [
         [
             InlineKeyboardButton(
@@ -354,8 +391,11 @@ def get_edit_shuffle_keyboard(quiz_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
-def get_edit_marking_keyboard(quiz_code: str) -> InlineKeyboardMarkup:
+def get_edit_marking_keyboard(
+    quiz_code: str
+) -> InlineKeyboardMarkup:
     """Marking selection keyboard when editing a quiz."""
+
     keyboard = [
         [
             InlineKeyboardButton(
@@ -386,8 +426,11 @@ def get_edit_marking_keyboard(quiz_code: str) -> InlineKeyboardMarkup:
     return InlineKeyboardMarkup(keyboard)
 
 
-def get_delete_confirm_keyboard(quiz_code: str) -> InlineKeyboardMarkup:
+def get_delete_confirm_keyboard(
+    quiz_code: str
+) -> InlineKeyboardMarkup:
     """Confirmation keyboard before deleting a quiz."""
+
     keyboard = [
         [
             InlineKeyboardButton(
@@ -406,6 +449,7 @@ def get_delete_confirm_keyboard(quiz_code: str) -> InlineKeyboardMarkup:
 
 def get_support_keyboard() -> InlineKeyboardMarkup:
     """Keyboard for /support command."""
+
     keyboard = [
         [
             InlineKeyboardButton(
@@ -422,7 +466,8 @@ def get_group_ready_keyboard(
     quiz_code: str,
     ready_count: int = 0
 ) -> InlineKeyboardMarkup:
-    """Ready button for group quiz starting flow with live participant count."""
+    """Ready button for group quiz starting flow."""
+
     from app.utils.branding import get_promo_keyboard_row
 
     label = (
@@ -444,8 +489,11 @@ def get_group_ready_keyboard(
     return InlineKeyboardMarkup(keyboard)
 
 
-def get_group_intro_keyboard(quiz_code: str) -> InlineKeyboardMarkup:
+def get_group_intro_keyboard(
+    quiz_code: str
+) -> InlineKeyboardMarkup:
     """Keyboard shown in group before launching the quiz."""
+
     return get_group_ready_keyboard(
         quiz_code,
         ready_count=0
@@ -458,10 +506,14 @@ def get_quiz_result_keyboard(
     lang: str = "en"
 ) -> InlineKeyboardMarkup:
     """Keyboard shown upon quiz completion."""
+
     from app.utils.branding import get_promo_keyboard_row
 
     clean_bot = bot_username.lstrip("@")
-    group_url = f"https://t.me/{clean_bot}?startgroup=quiz_{quiz_code}"
+
+    group_url = (
+        f"https://t.me/{clean_bot}?startgroup=quiz_{quiz_code}"
+    )
 
     keyboard = [
         [
@@ -500,6 +552,7 @@ def get_quiz_item_keyboard(
     lang: str = "en"
 ) -> InlineKeyboardMarkup:
     """Keyboard for an individual quiz in the /quizzes list."""
+
     keyboard = [
         [
             InlineKeyboardButton(
