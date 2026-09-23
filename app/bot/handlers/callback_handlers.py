@@ -15,6 +15,7 @@ from app.bot.keyboards.inline import (
     get_quiz_intro_keyboard,
     get_quiz_created_keyboard,
     get_group_ready_keyboard,
+    get_support_keyboard,
 )
 
 from app.bot.keyboards.reply import get_remove_keyboard
@@ -90,6 +91,49 @@ async def handle_callback_query(
         from app.bot.handlers.commands import help_command
 
         await help_command(update, context)
+        return
+
+    # =========================================================
+    # DEVELOPER
+    # =========================================================
+
+    elif data == "open_developer":
+
+        try:
+            await query.answer()
+        except Exception:
+            pass
+
+        await chat.send_message(
+            text=(
+                "👨‍💻 *Developer*\n\n"
+                "Developed & maintained by *SUMIT*.\n\n"
+                "📩 Contact: @Itz_Sumit"
+            ),
+            parse_mode=ParseMode.MARKDOWN
+        )
+        return
+
+    # =========================================================
+    # SUPPORT
+    # =========================================================
+
+    elif data == "open_support":
+
+        try:
+            await query.answer()
+        except Exception:
+            pass
+
+        await chat.send_message(
+            text=(
+                "🆘 *Support*\n\n"
+                "For help, updates and announcements, "
+                "join our support channel below."
+            ),
+            parse_mode=ParseMode.MARKDOWN,
+            reply_markup=get_support_keyboard()
+        )
         return
 
     elif data == "cmd:start":
@@ -754,7 +798,6 @@ async def handle_callback_query(
 
         ready_count = len(ready_users)
 
-        # Update ready button count
         try:
             await query.edit_message_reply_markup(
                 reply_markup=get_group_ready_keyboard(
@@ -765,7 +808,6 @@ async def handle_callback_query(
         except Exception:
             pass
 
-        # Countdown already started
         if chat_data.get(countdown_key):
 
             await query.answer(
@@ -776,7 +818,6 @@ async def handle_callback_query(
 
             return
 
-        # Start countdown
         chat_data[countdown_key] = True
 
         await query.answer(
@@ -820,7 +861,6 @@ async def handle_callback_query(
                 else "Quiz"
             )
 
-        # 3..2..1 Countdown
         for remaining in [3, 2, 1]:
 
             try:
