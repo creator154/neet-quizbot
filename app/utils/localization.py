@@ -194,7 +194,6 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "/support — Updates & channel support\n\n"
 
             "━━━━━━━━━━━━━━━━━━━━\n"
-            "📢 *Official Updates:* [SuperQuizUpdates](https://t.me/SuperQuizUpdates)"
         ),
 
         "support_text": (
