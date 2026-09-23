@@ -2,6 +2,7 @@
 
 from typing import Any, Dict
 
+
 STRINGS: Dict[str, Dict[str, str]] = {
     "en": {
         "start_welcome": (
@@ -12,6 +13,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "✅ Simple: +1 Correct, 0 Wrong\n"
             "⌛ Unattempted: 0"
         ),
+
         "btn_create_quiz": "Create New Quiz",
         "btn_my_quizzes": "My Quizzes",
         "btn_help": "Help",
@@ -86,7 +88,8 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "quizzes_header": "Your quizzes:\n",
 
         "quizzes_empty": (
-            "You haven't created any quizzes yet. Use /newquiz to create one!"
+            "You haven't created any quizzes yet. "
+            "Use /newquiz to create one!"
         ),
 
         "quizzes_item": (
@@ -126,9 +129,17 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "*{percentage}%*"
         ),
 
-        "question_timeout": "⌛ Time's up! Moving to the next question...",
-        "not_authorized": "You are not authorized to perform this action.",
-        "quiz_not_found": "Sorry, this quiz could not be found or is no longer available.",
+        "question_timeout": (
+            "⌛ Time's up! Moving to the next question..."
+        ),
+
+        "not_authorized": (
+            "You are not authorized to perform this action."
+        ),
+
+        "quiz_not_found": (
+            "Sorry, this quiz could not be found or is no longer available."
+        ),
 
         "help_text": (
             "📖 *NEET & NORCET QuizBot — User Guide*\n\n"
@@ -145,6 +156,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "• *Detailed Scorecard:* Correct, Wrong, Skipped, Negative marks aur Percentage analysis instant payein.\n\n"
 
             "⚖️ *Exam Marking Schemes:*\n"
+
             "1️⃣ *🎯 NEET UG Marking*\n"
             "   • Correct: *+4 Marks*\n"
             "   • Wrong: *-1 Mark*\n"
@@ -188,9 +200,10 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "support_text": (
             "📢 *QuizBot Support & Community*\n\n"
             "Join our official channel for latest quiz updates, notes, and feature releases:\n"
-            "👉 [https://t.me/SuperQuizUpdates](https://t.me/SuperQuizUpdates)\n\n"
-        )
+            "👉 [https://t.me/SuperQuizUpdates](https://t.me/SuperQuizUpdates)"
+        ),
     },
+
 
     "hi": {
         "start_welcome": (
@@ -232,15 +245,20 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "cancel_success": "क्विज़ रद्द कर दिया गया।",
         "cancel_no_active": "कोई सक्रिय क्विज़ नहीं है।",
         "stop_no_active": "🤔 रोकने के लिए कोई क्विज़ नहीं है।",
-        "stop_success": "क्विज़ रोक दिया गया।"
-    }
+        "stop_success": "क्विज़ रोक दिया गया।",
+    },
 }
 
 
 def t(key: str, lang: str = "en", **kwargs: Any) -> str:
     """Get localized string by key and format with kwargs."""
+
     lang_dict = STRINGS.get(lang, STRINGS["en"])
-    template = lang_dict.get(key, STRINGS["en"].get(key, key))
+
+    template = lang_dict.get(
+        key,
+        STRINGS["en"].get(key, key)
+    )
 
     if kwargs:
         try:
