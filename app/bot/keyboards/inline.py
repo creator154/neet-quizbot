@@ -10,7 +10,9 @@ from app.config import settings
 def get_start_keyboard(bot_username: str = "", lang: str = "en") -> InlineKeyboardMarkup:
     """Home /start inline menu."""
     clean_bot = (bot_username or settings.BOT_USERNAME or "akaxxh_bot").lstrip("@")
-    support_link = settings.SUPPORT_URL or "https://t.me/SuperQuizUpdates"
+
+    # Fixed official support channel
+    support_link = "https://t.me/SuperQuizUpdates"
 
     keyboard = [
         [
