@@ -1,16 +1,15 @@
-"""Unit tests for global branding configuration."""
+"""Global branding configuration."""
 
-from app.utils.branding import GLOBAL_PROMO_TEXT
-
-
-def test_branding_content():
-    """Verify promo text is disabled so messages stay clean."""
-    assert GLOBAL_PROMO_TEXT == ""
+from telegram import InlineKeyboardButton
 
 
-def test_branding_keyboards():
-    """Verify no promotional keyboard buttons are present."""
-    from app.utils.branding import get_promo_keyboard_row
+# Promotional branding is disabled.
+GLOBAL_PROMO_TEXT = ""
 
-    row = get_promo_keyboard_row()
-    assert len(row) == 0
+
+def get_promo_keyboard_row():
+    """Return promotional keyboard buttons.
+
+    Promotional buttons are currently disabled.
+    """
+    return []
