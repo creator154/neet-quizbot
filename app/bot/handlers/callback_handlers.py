@@ -36,20 +36,19 @@ async def handle_callback_query(
 
     data = query.data
 
-logger.warning(f"CALLBACK RECEIVED: {data}")
-
-try:
-    await query.answer()
-except Exception:
-    pass
+    # =========================================================
+    # DIRECT DEVELOPER LINK
+    # =========================================================
 
     if data == "open_developer":
         try:
             await query.answer(
                 url="https://t.me/SumitTripathi"
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(
+                f"Developer callback error: {e}"
+            )
         return
 
     # =========================================================
@@ -61,8 +60,10 @@ except Exception:
             await query.answer(
                 url="https://t.me/SuperQuizUpdates"
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.warning(
+                f"Support callback error: {e}"
+            )
         return
 
     # =========================================================
@@ -246,7 +247,9 @@ except Exception:
 
             if not quiz:
 
-                from app.database.repositories.user_repo import UserRepository
+                from app.database.repositories.user_repo import (
+                    UserRepository
+                )
 
                 user_obj = UserRepository.get_by_telegram_id(
                     db,
