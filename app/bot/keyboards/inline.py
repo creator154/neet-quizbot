@@ -27,6 +27,10 @@ def get_start_keyboard(bot_username: str = "", lang: str = "en") -> InlineKeyboa
         ],
         [
             InlineKeyboardButton(
+                "Bot Maker",
+                url="https://t.me/akaxxh"
+            ),
+            InlineKeyboardButton(
                 "Help",
                 callback_data="cmd:help"
             )
