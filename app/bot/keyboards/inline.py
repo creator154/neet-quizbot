@@ -11,9 +11,6 @@ def get_start_keyboard(bot_username: str = "", lang: str = "en") -> InlineKeyboa
     """Home /start inline menu."""
     clean_bot = (bot_username or settings.BOT_USERNAME or "akaxxh_bot").lstrip("@")
 
-    # Fixed official support channel
-    support_link = "https://t.me/SuperQuizUpdates"
-
     keyboard = [
         [
             InlineKeyboardButton(
@@ -30,7 +27,7 @@ def get_start_keyboard(bot_username: str = "", lang: str = "en") -> InlineKeyboa
         [
             InlineKeyboardButton(
                 "Developer",
-                url="https://t.me/SumitTripathi"
+                callback_data="open_developer"
             ),
             InlineKeyboardButton(
                 "Help",
@@ -40,7 +37,7 @@ def get_start_keyboard(bot_username: str = "", lang: str = "en") -> InlineKeyboa
         [
             InlineKeyboardButton(
                 "Support",
-                url=support_link
+                callback_data="open_support"
             )
         ]
     ]
