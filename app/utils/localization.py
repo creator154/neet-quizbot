@@ -157,14 +157,12 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "/stop — Active test session band karein\n"
             "/support — Updates & channel support\n\n"
             "━━━━━━━━━━━━━━━━━━━━\n"
-            "👨‍💻 *Bot Maker:* @akaxxh\n"
             "📢 *Official Updates:* [SuperQuizUpdates](https://t.me/SuperQuizUpdates)"
         ),
         "support_text": (
             "📢 *QuizBot Support & Community*\n\n"
             "Join our official channel for latest quiz updates, notes, and feature releases:\n"
             "👉 [https://t.me/SuperQuizUpdates](https://t.me/SuperQuizUpdates)\n\n"
-            "💬 *Contact Bot Maker for Queries:* @akaxxh"
         )
     },
     "hi": {
