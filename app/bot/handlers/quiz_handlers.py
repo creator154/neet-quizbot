@@ -12,31 +12,15 @@ from app.bot.keyboards.inline import get_quiz_result_keyboard
 from app.bot.keyboards.reply import get_remove_keyboard
 from app.utils.localization import t
 from app.utils.logger import logger
-from app.utils.branding import GLOBAL_PROMO_TEXT
 
 
-async def send_quiz_promo(
-    context: ContextTypes.DEFAULT_TYPE,
-    chat_id: int
+async def on_question_timeout(
+    context: ContextTypes.DEFAULT_TYPE
 ) -> None:
-    """Send the configured promo message before every quiz poll."""
-
-    if not GLOBAL_PROMO_TEXT:
-        return
-
-    try:
-        await context.bot.send_message(
-            chat_id=chat_id,
-            text=GLOBAL_PROMO_TEXT,
-            disable_web_page_preview=True
-        )
-    except Exception as e:
-        logger.error(f"Error sending quiz promo: {e}", exc_info=True)
-
-
-async def on_question_timeout(context: ContextTypes.DEFAULT_TYPE) -> None:
     """Callback fired when a question timer expires on the server."""
+
     job_data = context.job.data if context.job else None
+
     if not job_data:
         return
 
@@ -60,7 +44,11 @@ async def on_question_timeout(context: ContextTypes.DEFAULT_TYPE) -> None:
     )
 
     if is_complete:
-        await send_quiz_results(context, chat_id, attempt_id)
+        await send_quiz_results(
+            context,
+            chat_id,
+            attempt_id
+        )
     else:
         user_tid = (
             attempt.user.telegram_user_id
@@ -99,64 +87,88 @@ async def send_next_question(
         )
         return
 
-    # 1. Send pre-question media if attached
+    # ============================================================
+    # 1. SEND MANUALLY ADDED PRE-QUESTION MEDIA / TEXT
+    # ============================================================
+
     media_file = payload.get("media_file_id")
     media_type = payload.get("media_type")
 
     if media_file and media_type:
         try:
+
+            # -------------------------
+            # PHOTO
+            # -------------------------
             if media_type == "photo":
                 await context.bot.send_photo(
                     chat_id=chat_id,
                     photo=media_file
                 )
 
+            # -------------------------
+            # VIDEO
+            # -------------------------
             elif media_type == "video":
                 await context.bot.send_video(
                     chat_id=chat_id,
                     video=media_file
                 )
 
+            # -------------------------
+            # ANIMATION / GIF
+            # -------------------------
             elif media_type == "animation":
                 await context.bot.send_animation(
                     chat_id=chat_id,
                     animation=media_file
                 )
 
+            # -------------------------
+            # DOCUMENT
+            # -------------------------
             elif media_type == "document":
                 await context.bot.send_document(
                     chat_id=chat_id,
                     document=media_file
                 )
 
+            # -------------------------
+            # NORMAL TEXT / PROMO
+            # -------------------------
             elif media_type == "text":
                 await context.bot.send_message(
                     chat_id=chat_id,
-                    text=f"ℹ️ Note:\n{media_file}"
+                    text=media_file,
+                    disable_web_page_preview=True
                 )
 
         except Exception as e:
             logger.error(
-                f"Error sending pre-question media: {e}"
+                f"Error sending pre-question media: {e}",
+                exc_info=True
             )
 
-    # 2. Send configured normal promo message
-    #    before every quiz poll
-    await send_quiz_promo(
-        context,
-        chat_id
-    )
+    # ============================================================
+    # 2. SEND TELEGRAM NATIVE QUIZ POLL
+    # ============================================================
 
-    # 3. Send Telegram native quiz poll
-    timer_seconds = payload.get("timer_seconds", 0)
+    timer_seconds = payload.get(
+        "timer_seconds",
+        0
+    )
 
     open_period = (
         timer_seconds
-        if (timer_seconds and 5 <= timer_seconds <= 600)
+        if (
+            timer_seconds
+            and 5 <= timer_seconds <= 600
+        )
         else None
     )
 
     try:
+
         poll_msg = await context.bot.send_poll(
             chat_id=chat_id,
             question=payload["question_text"],
@@ -168,27 +180,39 @@ async def send_next_question(
             open_period=open_period
         )
 
+        # ========================================================
+        # SAVE POLL INFORMATION
+        # ========================================================
+
         with get_db() as db:
             AttemptService.record_poll_sent(
                 db=db,
-                attempt_question_id=payload["attempt_question_id"],
+                attempt_question_id=payload[
+                    "attempt_question_id"
+                ],
                 poll_id=poll_msg.poll.id,
                 message_id=poll_msg.message_id,
                 deadline=payload["deadline"]
             )
 
-        # 4. Schedule server-side timeout if timer enabled
+        # ========================================================
+        # SERVER-SIDE TIMER
+        # ========================================================
+
         if timer_seconds and timer_seconds > 0:
             TimerService.schedule_question_timeout(
                 context=context,
                 chat_id=chat_id,
                 attempt_id=attempt_id,
-                attempt_question_id=payload["attempt_question_id"],
+                attempt_question_id=payload[
+                    "attempt_question_id"
+                ],
                 timer_seconds=timer_seconds,
                 callback_coroutine=on_question_timeout
             )
 
     except Exception as e:
+
         logger.error(
             f"Error sending quiz poll: {e}",
             exc_info=True
@@ -212,6 +236,7 @@ async def send_quiz_results(
     """Display final NEET score card and action buttons."""
 
     with get_db() as db:
+
         attempt = AttemptRepository.get_by_id(
             db,
             attempt_id
@@ -223,7 +248,15 @@ async def send_quiz_results(
         quiz = attempt.quiz
 
         bot_user = await context.bot.get_me()
-        bot_username = bot_user.username or "quizbot"
+
+        bot_username = (
+            bot_user.username
+            or "quizbot"
+        )
+
+        # ========================================================
+        # CALCULATE SCORE
+        # ========================================================
 
         score_res = ScoringService.calculate_score(
             correct_count=attempt.correct_count,
@@ -234,33 +267,51 @@ async def send_quiz_results(
             unattempted_marks=quiz.unattempted_marks
         )
 
+        # ========================================================
+        # RESULT CARD
+        # ========================================================
+
         card_text = t(
             "quiz_completed",
+
             title=quiz.title,
+
             total=score_res.total_questions,
+
             correct=score_res.correct_count,
+
             wrong=score_res.wrong_count,
+
             unattempted=score_res.unattempted_count,
+
             correct_marks_total=int(
                 score_res.correct_marks_total
             ),
+
             wrong_marks_total=int(
                 score_res.wrong_marks_total
             ),
+
             score=(
                 int(score_res.score)
                 if score_res.score.is_integer()
                 else score_res.score
             ),
+
             max_score=(
                 int(score_res.max_score)
                 if score_res.max_score.is_integer()
                 else score_res.max_score
             ),
+
             percentage=score_res.percentage
         )
 
         quiz_code = quiz.quiz_code
+
+    # ============================================================
+    # SEND RESULT
+    # ============================================================
 
     await context.bot.send_message(
         chat_id=chat_id,
