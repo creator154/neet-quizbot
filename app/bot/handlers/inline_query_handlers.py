@@ -69,11 +69,10 @@ async def handle_inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE
             # [description]
             # 🖊 21 questions · ⏱ 15 sec
             message_text = (
-                f"🎲 *Quiz '{quiz.title}'*{answered_str}\n\n"
-                f"{desc_text}"
-                f"🖊 *{q_count} questions* · ⏱ *{timer_text}*"
+    f"🎲 Quiz '{quiz.title}'{answered_str}\n\n"
+    f"{desc_text}"
+    f"🖊 {q_count} questions · ⏱ {timer_text}"
             )
-
             # Keyboard matching Image 1 with promo buttons:
             keyboard = [
                 [InlineKeyboardButton("Start this quiz", url=f"https://t.me/{clean_bot}?start=quiz_{quiz.quiz_code}")],
@@ -89,10 +88,9 @@ async def handle_inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE
                     title=f"Quiz '{quiz.title}'",
                     description=f"{q_count} questions · {timer_text}",
                     input_message_content=InputTextMessageContent(
-                        message_text=message_text,
-                        parse_mode=ParseMode.MARKDOWN,
-                        link_preview_options=LinkPreviewOptions(is_disabled=True)
-                    ),
+    message_text=message_text,
+    link_preview_options=LinkPreviewOptions(is_disabled=True)
+),
                     reply_markup=InlineKeyboardMarkup(keyboard)
                 )
             )
