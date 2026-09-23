@@ -22,32 +22,39 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "btn_share_group": "Start quiz in group",
         "btn_back": "Back",
         "btn_cancel": "Cancel",
+
         "newquiz_unfinished": (
             "You have an unfinished quiz.\n"
             "Please finish creating it or send /cancel."
         ),
+
         "newquiz_prompt_title": (
             "Let's create a new quiz.\n"
             "First, send me the title of your quiz."
         ),
+
         "newquiz_prompt_description": (
             "Good. Now send me a description of your quiz.\n"
             "This is optional, you can /skip this step."
         ),
+
         "newquiz_first_question_prompt": (
             "Now send your first question – or some text or media that will be shown before it.\n\n"
             "Use the 'Create a question' button below to create a native quiz poll."
         ),
+
         "media_attached": (
             "📷 Media received! It will be attached to the next question you create.\n"
             "Now click 'Create a question' below to add the quiz poll."
         ),
+
         "question_added": (
             "Good. Your quiz '{title}' now has {count} questions.\n\n"
             "If you made a mistake in the question, you can go back by sending /undo.\n\n"
             "Now send the next question – or some text or media that will be shown before it.\n\n"
             "When done, simply send /done to finish creating the quiz."
         ),
+
         "undo_success": "Last question removed.",
         "undo_empty": "There is no question to undo.",
         "cancel_success": "Quiz discarded.",
@@ -57,6 +64,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "done_need_questions": "Please add at least one question before finishing.",
         "timer_prompt": "Please set a time limit for questions.",
         "shuffle_prompt": "Shuffle questions and answer options?",
+
         "quiz_summary": (
             "Quiz:\n"
             "{title}\n\n"
@@ -74,8 +82,13 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "Share link:\n"
             "{share_url}"
         ),
+
         "quizzes_header": "Your quizzes:\n",
-        "quizzes_empty": "You haven't created any quizzes yet. Use /newquiz to create one!",
+
+        "quizzes_empty": (
+            "You haven't created any quizzes yet. Use /newquiz to create one!"
+        ),
+
         "quizzes_item": (
             "{index}. {title}\n"
             "   {count} questions\n"
@@ -83,8 +96,10 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "   +{correct}/{wrong}\n"
             "   {status}\n"
         ),
+
         "lang_prompt": "Select your preferred language / अपनी भाषा चुनें:",
         "lang_changed": "Language set to English.",
+
         "participant_quiz_intro": (
             "*{title}*\n\n"
             "{description}\n\n"
@@ -95,6 +110,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "{unattempted} unattempted\n"
             "Time per question: {timer}"
         ),
+
         "quiz_completed": (
             "🏁 *QUIZ COMPLETE*\n\n"
             "*{title}*\n\n"
@@ -109,14 +125,17 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "Percentage:\n"
             "*{percentage}%*"
         ),
+
         "question_timeout": "⌛ Time's up! Moving to the next question...",
         "not_authorized": "You are not authorized to perform this action.",
         "quiz_not_found": "Sorry, this quiz could not be found or is no longer available.",
+
         "help_text": (
             "📖 *NEET & NORCET QuizBot — User Guide*\n\n"
             "━━━━━━━━━━━━━━━━━━━━\n"
             "🎯 *Ye Bot Kyu Banaya Gaya Hai?*\n"
             "Medical aur Nursing competitive exams (NEET UG, AIIMS NORCET, State Nursing Exams) ke liye high speed aur accuracy build karne ke liye. Negative marking ka exact exam simulation dekar real exam environment prepare karna iska uddeshya hai.\n\n"
+
             "⚙️ *Ye Kaise Kaam Karta Hai?*\n"
             "• *Telegram Native Polls:* Fast, reliable aur lag-free test experience.\n"
             "• *Question Timers:* 10s se 5m tak per-question time limit exam pressure create karne ke liye.\n"
@@ -124,19 +143,23 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "• *Media Support:* Pre-question diagrams, formulas, ya notes attach kar sakte hain.\n"
             "• *Group Live Battles:* Groups me live countdown ke saath synchronous multi-user quiz conduct karwayein.\n"
             "• *Detailed Scorecard:* Correct, Wrong, Skipped, Negative marks aur Percentage analysis instant payein.\n\n"
+
             "⚖️ *Exam Marking Schemes:*\n"
             "1️⃣ *🎯 NEET UG Marking*\n"
             "   • Correct: *+4 Marks*\n"
             "   • Wrong: *-1 Mark*\n"
             "   • Skipped: *0 Marks*\n"
             "   _(Exact NTA NEET UG Exam Pattern)_\n\n"
+
             "2️⃣ *🏥 NORCET (AIIMS) Marking*\n"
             "   • Correct: *+1 Mark*\n"
             "   • Wrong: *-0.33 Marks* (1/3rd Negative)\n"
             "   • Skipped: *0 Marks*\n"
             "   _(Official AIIMS Nursing Officer Pattern)_\n\n"
+
             "3️⃣ *✅ Simple Marking*\n"
             "   • Correct: *+1 Mark* | Wrong: *0 Marks*\n\n"
+
             "📝 *Quiz Kaise Banayein (Step-by-Step)?*\n"
             "1. /newquiz command bhejein aur Quiz ka *Title* likhein.\n"
             "2. Quiz ka *Description* bhejein (ya /skip bhej dein).\n"
@@ -147,6 +170,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "7. *Shuffle* setting select karein (Shuffle All, Questions, ya None).\n"
             "8. *Marking Scheme* choose karein (NEET, NORCET, Simple).\n"
             "9. ✨ Quiz ready! Direct link se share karein ya Group me start karein.\n\n"
+
             "🛠 *Useful Commands:*\n"
             "/newquiz — Naya quiz create karein\n"
             "/quizzes — Apne banaye huye quizzes dekhein\n"
@@ -156,15 +180,18 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "/cancel — Current quiz draft cancel karein\n"
             "/stop — Active test session band karein\n"
             "/support — Updates & channel support\n\n"
+
             "━━━━━━━━━━━━━━━━━━━━\n"
             "📢 *Official Updates:* [SuperQuizUpdates](https://t.me/SuperQuizUpdates)"
         ),
+
         "support_text": (
             "📢 *QuizBot Support & Community*\n\n"
             "Join our official channel for latest quiz updates, notes, and feature releases:\n"
             "👉 [https://t.me/SuperQuizUpdates](https://t.me/SuperQuizUpdates)\n\n"
         )
     },
+
     "hi": {
         "start_welcome": (
             "यह बॉट आपको बहुविकल्पीय क्विज़ बनाने और आयोजित करने में मदद करता है।\n\n"
@@ -173,6 +200,7 @@ STRINGS: Dict[str, Dict[str, str]] = {
             "❌ गलत: -1\n"
             "⌛ अनुत्तरित: 0"
         ),
+
         "btn_create_quiz": "नया क्विज़ बनाएं",
         "btn_my_quizzes": "मेरे क्विज़",
         "btn_help": "मदद",
@@ -183,18 +211,22 @@ STRINGS: Dict[str, Dict[str, str]] = {
         "btn_share_group": "ग्रुप में शुरू करें",
         "btn_back": "पीछे",
         "btn_cancel": "रद्द करें",
+
         "newquiz_unfinished": (
             "आपके पास एक अधूरा क्विज़ है।\n"
             "कृपया इसे पूरा करें या /cancel भेजें।"
         ),
+
         "newquiz_prompt_title": (
             "आइए एक नया क्विज़ बनाएं।\n"
             "पहले मुझे अपने क्विज़ का शीर्षक भेजें।"
         ),
+
         "newquiz_prompt_description": (
             "अच्छा। अब अपने क्विज़ का विवरण भेजें।\n"
             "यह वैकल्पिक है, आप /skip भेज सकते हैं।"
         ),
+
         "undo_success": "अंतिम प्रश्न हटा दिया गया।",
         "undo_empty": "पूर्ववत करने के लिए कोई प्रश्न नहीं है।",
         "cancel_success": "क्विज़ रद्द कर दिया गया।",
@@ -209,9 +241,11 @@ def t(key: str, lang: str = "en", **kwargs: Any) -> str:
     """Get localized string by key and format with kwargs."""
     lang_dict = STRINGS.get(lang, STRINGS["en"])
     template = lang_dict.get(key, STRINGS["en"].get(key, key))
+
     if kwargs:
         try:
             return template.format(**kwargs)
         except Exception:
             return template
+
     return template
