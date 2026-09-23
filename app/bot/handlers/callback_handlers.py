@@ -38,8 +38,10 @@ async def handle_callback_query(
 
 logger.warning(f"CALLBACK RECEIVED: {data}")
 
-# =========================================================
-# DIRECT DEVELOPER LINK
+try:
+    await query.answer()
+except Exception:
+    pass
 
     if data == "open_developer":
         try:
