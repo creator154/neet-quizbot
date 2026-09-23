@@ -1,4 +1,4 @@
-here"""Inline keyboards for menus, settings, attempts, and results."""
+"""Inline keyboards for menus, settings, attempts, and results."""
 
 from typing import List, Optional
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
