@@ -37,33 +37,29 @@ async def handle_callback_query(
     data = query.data
 
     # =========================================================
-    # DIRECT DEVELOPER LINK
+    # OLD DEVELOPER CALLBACK
     # =========================================================
 
     if data == "open_developer":
         try:
             await query.answer(
-                url="https://t.me/SumitTripathi"
+                "Please use the Developer button."
             )
-        except Exception as e:
-            logger.warning(
-                f"Developer callback error: {e}"
-            )
+        except Exception:
+            pass
         return
 
     # =========================================================
-    # DIRECT SUPPORT LINK
+    # OLD SUPPORT CALLBACK
     # =========================================================
 
     if data == "open_support":
         try:
             await query.answer(
-                url="https://t.me/SuperQuizUpdates"
+                "Please use the Support button."
             )
-        except Exception as e:
-            logger.warning(
-                f"Support callback error: {e}"
-            )
+        except Exception:
+            pass
         return
 
     # =========================================================
@@ -296,7 +292,15 @@ async def handle_callback_query(
 
     elif data.startswith("edit_quiz:"):
 
-        quiz_code = data.split(":", 1)[1]
+        quiz_code = data.split(":", 1)[1].strip()
+
+        logger.info(
+            f"EDIT QUIZ CALLBACK: user={user.id}, quiz={quiz_code}"
+        )
+
+        from app.bot.keyboards.inline import (
+            get_edit_quiz_keyboard
+        )
 
         with get_db() as db:
 
@@ -310,38 +314,76 @@ async def handle_callback_query(
                     "Quiz not found.",
                     show_alert=True
                 )
+
+                logger.warning(
+                    f"Edit failed: quiz not found: {quiz_code}"
+                )
+
                 return
 
-            if quiz.creator.telegram_id != user.id:
+            creator = quiz.creator
+
+            if not creator or creator.telegram_id != user.id:
+
                 await query.answer(
                     "You can only edit your own quizzes.",
                     show_alert=True
                 )
+
+                logger.warning(
+                    f"Unauthorized edit attempt: "
+                    f"user={user.id}, quiz={quiz_code}"
+                )
+
                 return
 
-        from app.bot.keyboards.inline import get_edit_quiz_keyboard
+            quiz_title = quiz.title or "Untitled Quiz"
+
+        # Plain text intentionally used here.
+        # This prevents Markdown errors when the quiz title
+        # contains *, _, [, ], (, ), or other special characters.
+        edit_text = (
+            "⚙️ Edit Quiz Settings\n\n"
+            f"Quiz: {quiz_title}\n\n"
+            "Select what you want to edit:"
+        )
 
         try:
-            await query.edit_message_text(
-                text=(
-                    "⚙️ *Edit Quiz Settings*\n\n"
-                    f"Quiz: *{quiz.title}*\n\n"
-                    "Select what you want to edit:"
-                ),
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=get_edit_quiz_keyboard(quiz_code)
-            )
-        except Exception:
 
-            await chat.send_message(
-                text=(
-                    "⚙️ *Edit Quiz Settings*\n\n"
-                    f"Quiz: *{quiz.title}*\n\n"
-                    "Select what you want to edit:"
-                ),
-                parse_mode=ParseMode.MARKDOWN,
-                reply_markup=get_edit_quiz_keyboard(quiz_code)
+            await query.edit_message_text(
+                text=edit_text,
+                reply_markup=get_edit_quiz_keyboard(
+                    quiz_code
+                )
             )
+
+            logger.info(
+                f"Edit menu opened successfully: {quiz_code}"
+            )
+
+        except Exception as e:
+
+            logger.exception(
+                f"Failed to edit quiz menu "
+                f"for {quiz_code}: {e}"
+            )
+
+            # Fallback if Telegram cannot edit the old message.
+            try:
+
+                await chat.send_message(
+                    text=edit_text,
+                    reply_markup=get_edit_quiz_keyboard(
+                        quiz_code
+                    )
+                )
+
+            except Exception as send_error:
+
+                logger.exception(
+                    f"Failed to send edit menu fallback: "
+                    f"{send_error}"
+                )
 
         return
 
@@ -390,16 +432,22 @@ async def handle_callback_query(
 
         quiz_code = data.split(":", 1)[1]
 
-        from app.bot.keyboards.inline import get_edit_timer_keyboard
+        from app.bot.keyboards.inline import (
+            get_edit_timer_keyboard
+        )
 
         try:
             await query.edit_message_text(
                 text="⏱ *Select a new timer per question:*",
                 parse_mode=ParseMode.MARKDOWN,
-                reply_markup=get_edit_timer_keyboard(quiz_code)
+                reply_markup=get_edit_timer_keyboard(
+                    quiz_code
+                )
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.exception(
+                f"Failed to open edit timer menu: {e}"
+            )
 
         return
 
@@ -475,10 +523,14 @@ async def handle_callback_query(
             await query.edit_message_text(
                 text="🔀 *Select shuffle settings for this quiz:*",
                 parse_mode=ParseMode.MARKDOWN,
-                reply_markup=get_edit_shuffle_keyboard(quiz_code)
+                reply_markup=get_edit_shuffle_keyboard(
+                    quiz_code
+                )
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.exception(
+                f"Failed to open edit shuffle menu: {e}"
+            )
 
         return
 
@@ -559,10 +611,14 @@ async def handle_callback_query(
                     "+1 Correct, 0 Wrong, 0 Skipped"
                 ),
                 parse_mode=ParseMode.MARKDOWN,
-                reply_markup=get_edit_marking_keyboard(quiz_code)
+                reply_markup=get_edit_marking_keyboard(
+                    quiz_code
+                )
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.exception(
+                f"Failed to open edit marking menu: {e}"
+            )
 
         return
 
@@ -644,8 +700,10 @@ async def handle_callback_query(
                     quiz_code
                 )
             )
-        except Exception:
-            pass
+        except Exception as e:
+            logger.exception(
+                f"Failed to open delete menu: {e}"
+            )
 
         return
 
