@@ -6,7 +6,8 @@ from telegram import (
     InlineQueryResultArticle,
     InputTextMessageContent,
     InlineKeyboardButton,
-    InlineKeyboardMarkup
+    InlineKeyboardMarkup,
+    LinkPreviewOptions
 )
 from telegram.constants import ParseMode
 from telegram.ext import ContextTypes
@@ -70,9 +71,7 @@ async def handle_inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE
             message_text = (
                 f"🎲 *Quiz '{quiz.title}'*{answered_str}\n\n"
                 f"{desc_text}"
-                f"🖊 *{q_count} questions* · ⏱ *{timer_text}*\n\n"
-                f"──────────────────\n"
-                f"{GLOBAL_PROMO_TEXT}"
+                f"🖊 *{q_count} questions* · ⏱ *{timer_text}*"
             )
 
             # Keyboard matching Image 1 with promo buttons:
@@ -91,7 +90,8 @@ async def handle_inline_query(update: Update, context: ContextTypes.DEFAULT_TYPE
                     description=f"{q_count} questions · {timer_text}",
                     input_message_content=InputTextMessageContent(
                         message_text=message_text,
-                        parse_mode=ParseMode.MARKDOWN
+                        parse_mode=ParseMode.MARKDOWN,
+                        link_preview_options=LinkPreviewOptions(is_disabled=True)
                     ),
                     reply_markup=InlineKeyboardMarkup(keyboard)
                 )
