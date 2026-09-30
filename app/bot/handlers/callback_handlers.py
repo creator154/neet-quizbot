@@ -37,35 +37,12 @@ async def handle_callback_query(
     data = query.data
 
     # =========================================================
-    # OLD DEVELOPER CALLBACK
+    # ANSWER CALLBACK IMMEDIATELY
     # =========================================================
-
-    if data == "open_developer":
-        try:
-            await query.answer(
-                "Please use the Developer button."
-            )
-        except Exception:
-            pass
-        return
-
-    # =========================================================
-    # OLD SUPPORT CALLBACK
-    # =========================================================
-
-    if data == "open_support":
-        try:
-            await query.answer(
-                "Please use the Support button."
-            )
-        except Exception:
-            pass
-        return
-
-    # =========================================================
-    # NORMAL CALLBACK ANSWER
-    # =========================================================
-
+    #
+    # Telegram callback queries expire quickly.
+    # Answer once immediately before doing any database/API work.
+    #
     try:
         await query.answer()
     except Exception:
@@ -84,12 +61,43 @@ async def handle_callback_query(
         bot_username = "quizbot"
 
     # =========================================================
-    # 1. MENU SHORTCUTS
+    # 1. OLD DEVELOPER CALLBACK
+    # =========================================================
+
+    if data == "open_developer":
+
+        try:
+            await chat.send_message(
+                "Please use the Developer button."
+            )
+        except Exception:
+            pass
+
+        return
+
+    # =========================================================
+    # 2. OLD SUPPORT CALLBACK
+    # =========================================================
+
+    if data == "open_support":
+
+        try:
+            await chat.send_message(
+                "Please use the Support button."
+            )
+        except Exception:
+            pass
+
+        return
+
+    # =========================================================
+    # 3. MENU SHORTCUTS
     # =========================================================
 
     if data == "cmd:newquiz":
 
         with get_db() as db:
+
             quiz, status = QuizService.start_new_quiz(
                 db,
                 user.id,
@@ -98,50 +106,68 @@ async def handle_callback_query(
             )
 
             if status == "UNFINISHED_EXISTS":
+
                 await chat.send_message(
                     t("newquiz_unfinished")
                 )
+
                 return
 
         await chat.send_message(
             t("newquiz_prompt_title"),
             reply_markup=get_remove_keyboard()
         )
+
         return
 
     elif data == "cmd:quizzes":
 
         from app.bot.handlers.commands import quizzes_command
 
-        await quizzes_command(update, context)
+        await quizzes_command(
+            update,
+            context
+        )
+
         return
 
     elif data == "cmd:help":
 
         from app.bot.handlers.commands import help_command
 
-        await help_command(update, context)
+        await help_command(
+            update,
+            context
+        )
+
         return
 
     elif data == "cmd:start":
 
         from app.bot.handlers.commands import start_command
 
-        await start_command(update, context)
+        await start_command(
+            update,
+            context
+        )
+
         return
 
     # =========================================================
-    # 2. TIMER SELECTION
+    # 4. TIMER SELECTION
     # =========================================================
 
     elif data.startswith("timer:"):
 
         try:
-            seconds = int(data.split(":", 1)[1])
+            seconds = int(
+                data.split(":", 1)[1]
+            )
         except (ValueError, IndexError):
             return
 
         with get_db() as db:
+
             QuizService.set_timer(
                 db,
                 user.id,
@@ -155,6 +181,7 @@ async def handle_callback_query(
         )
 
         try:
+
             await query.edit_message_text(
                 text=(
                     f"⏱ Question timer set to: "
@@ -164,23 +191,35 @@ async def handle_callback_query(
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=get_shuffle_keyboard()
             )
+
         except Exception:
             pass
 
         return
 
     # =========================================================
-    # 3. SHUFFLE SELECTION
+    # 5. SHUFFLE SELECTION
     # =========================================================
 
     elif data.startswith("shuffle:"):
 
-        mode = data.split(":", 1)[1]
+        mode = data.split(
+            ":",
+            1
+        )[1]
 
-        shuffle_q = mode in ("all", "questions")
-        shuffle_opt = mode in ("all", "options")
+        shuffle_q = mode in (
+            "all",
+            "questions"
+        )
+
+        shuffle_opt = mode in (
+            "all",
+            "options"
+        )
 
         with get_db() as db:
+
             QuizService.set_shuffle(
                 db,
                 user.id,
@@ -188,9 +227,12 @@ async def handle_callback_query(
                 shuffle_opt
             )
 
-        from app.bot.keyboards.inline import get_marking_keyboard
+        from app.bot.keyboards.inline import (
+            get_marking_keyboard
+        )
 
         try:
+
             await query.edit_message_text(
                 text=(
                     "⚖️ *Choose the marking scheme for this quiz:*\n\n"
@@ -204,13 +246,14 @@ async def handle_callback_query(
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=get_marking_keyboard()
             )
+
         except Exception:
             pass
 
         return
 
     # =========================================================
-    # 3B. MARKING SELECTION & PUBLISHING
+    # 6. MARKING SELECTION & PUBLISHING
     # =========================================================
 
     elif data.startswith("marking:"):
@@ -221,8 +264,10 @@ async def handle_callback_query(
             return
 
         try:
+
             correct = float(parts[1])
             wrong = float(parts[2])
+
         except ValueError:
             return
 
@@ -259,7 +304,10 @@ async def handle_callback_query(
                         user_obj.id
                     )
 
-                    if quizzes and quizzes[0].status == "PUBLISHED":
+                    if (
+                        quizzes
+                        and quizzes[0].status == "PUBLISHED"
+                    ):
                         quiz = quizzes[0]
 
             if not quiz:
@@ -267,6 +315,7 @@ async def handle_callback_query(
                 await chat.send_message(
                     "⚠️ Could not publish quiz. Please try again."
                 )
+
                 return
 
         try:
@@ -287,15 +336,19 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 3C. EDIT QUIZ MENU
+    # 7. EDIT QUIZ MENU
     # =========================================================
 
     elif data.startswith("edit_quiz:"):
 
-        quiz_code = data.split(":", 1)[1].strip()
+        quiz_code = data.split(
+            ":",
+            1
+        )[1].strip()
 
         logger.info(
-            f"EDIT QUIZ CALLBACK: user={user.id}, quiz={quiz_code}"
+            f"EDIT QUIZ CALLBACK: "
+            f"user={user.id}, quiz={quiz_code}"
         )
 
         from app.bot.keyboards.inline import (
@@ -310,24 +363,27 @@ async def handle_callback_query(
             )
 
             if not quiz:
-                await query.answer(
-                    "Quiz not found.",
-                    show_alert=True
+
+                await chat.send_message(
+                    "⚠️ Quiz not found."
                 )
 
                 logger.warning(
-                    f"Edit failed: quiz not found: {quiz_code}"
+                    f"Edit failed: quiz not found: "
+                    f"{quiz_code}"
                 )
 
                 return
 
             creator = quiz.creator
 
-            if not creator or creator.telegram_id != user.id:
+            if (
+                not creator
+                or creator.telegram_id != user.id
+            ):
 
-                await query.answer(
-                    "You can only edit your own quizzes.",
-                    show_alert=True
+                await chat.send_message(
+                    "⚠️ You can only edit your own quizzes."
                 )
 
                 logger.warning(
@@ -339,9 +395,6 @@ async def handle_callback_query(
 
             quiz_title = quiz.title or "Untitled Quiz"
 
-        # Plain text intentionally used here.
-        # This prevents Markdown errors when the quiz title
-        # contains *, _, [, ], (, ), or other special characters.
         edit_text = (
             "⚙️ Edit Quiz Settings\n\n"
             f"Quiz: {quiz_title}\n\n"
@@ -358,7 +411,8 @@ async def handle_callback_query(
             )
 
             logger.info(
-                f"Edit menu opened successfully: {quiz_code}"
+                f"Edit menu opened successfully: "
+                f"{quiz_code}"
             )
 
         except Exception as e:
@@ -368,7 +422,6 @@ async def handle_callback_query(
                 f"for {quiz_code}: {e}"
             )
 
-            # Fallback if Telegram cannot edit the old message.
             try:
 
                 await chat.send_message(
@@ -388,15 +441,23 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 4. EDIT TITLE
+    # 8. EDIT TITLE
     # =========================================================
 
     elif data.startswith("edit_title:"):
 
-        quiz_code = data.split(":", 1)[1]
+        quiz_code = data.split(
+            ":",
+            1
+        )[1]
 
-        context.user_data["editing_quiz_code"] = quiz_code
-        context.user_data["editing_field"] = "title"
+        context.user_data[
+            "editing_quiz_code"
+        ] = quiz_code
+
+        context.user_data[
+            "editing_field"
+        ] = "title"
 
         await chat.send_message(
             "📝 *Please send the new title for your quiz:*",
@@ -406,15 +467,23 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 5. EDIT DESCRIPTION
+    # 9. EDIT DESCRIPTION
     # =========================================================
 
     elif data.startswith("edit_desc:"):
 
-        quiz_code = data.split(":", 1)[1]
+        quiz_code = data.split(
+            ":",
+            1
+        )[1]
 
-        context.user_data["editing_quiz_code"] = quiz_code
-        context.user_data["editing_field"] = "desc"
+        context.user_data[
+            "editing_quiz_code"
+        ] = quiz_code
+
+        context.user_data[
+            "editing_field"
+        ] = "desc"
 
         await chat.send_message(
             "📄 *Please send the new description for your quiz "
@@ -425,26 +494,34 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 6. EDIT TIMER MENU
+    # 10. EDIT TIMER MENU
     # =========================================================
 
     elif data.startswith("edit_timer:"):
 
-        quiz_code = data.split(":", 1)[1]
+        quiz_code = data.split(
+            ":",
+            1
+        )[1]
 
         from app.bot.keyboards.inline import (
             get_edit_timer_keyboard
         )
 
         try:
+
             await query.edit_message_text(
-                text="⏱ *Select a new timer per question:*",
+                text=(
+                    "⏱ *Select a new timer per question:*"
+                ),
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=get_edit_timer_keyboard(
                     quiz_code
                 )
             )
+
         except Exception as e:
+
             logger.exception(
                 f"Failed to open edit timer menu: {e}"
             )
@@ -452,7 +529,7 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 7. EDIT TIMER
+    # 11. EDIT TIMER
     # =========================================================
 
     elif data.startswith("ed_tm:"):
@@ -476,19 +553,15 @@ async def handle_callback_query(
                 quiz_code
             )
 
-            if quiz and quiz.creator.telegram_id == user.id:
+            if (
+                quiz
+                and quiz.creator.telegram_id == user.id
+            ):
 
                 quiz.timer_seconds = seconds
 
                 db.commit()
                 db.refresh(quiz)
-
-                await query.answer(
-                    f"Timer set to "
-                    f"{seconds} seconds!"
-                    if seconds > 0
-                    else "Timer disabled!"
-                )
 
                 try:
                     await query.message.delete()
@@ -508,26 +581,35 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 8. EDIT SHUFFLE MENU
+    # 12. EDIT SHUFFLE MENU
     # =========================================================
 
     elif data.startswith("edit_shuffle:"):
 
-        quiz_code = data.split(":", 1)[1]
+        quiz_code = data.split(
+            ":",
+            1
+        )[1]
 
         from app.bot.keyboards.inline import (
             get_edit_shuffle_keyboard
         )
 
         try:
+
             await query.edit_message_text(
-                text="🔀 *Select shuffle settings for this quiz:*",
+                text=(
+                    "🔀 *Select shuffle settings "
+                    "for this quiz:*"
+                ),
                 parse_mode=ParseMode.MARKDOWN,
                 reply_markup=get_edit_shuffle_keyboard(
                     quiz_code
                 )
             )
+
         except Exception as e:
+
             logger.exception(
                 f"Failed to open edit shuffle menu: {e}"
             )
@@ -535,7 +617,7 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 9. EDIT SHUFFLE
+    # 13. EDIT SHUFFLE
     # =========================================================
 
     elif data.startswith("ed_sh:"):
@@ -548,8 +630,15 @@ async def handle_callback_query(
         quiz_code = parts[1]
         mode = parts[2]
 
-        shuffle_q = mode in ("all", "questions")
-        shuffle_opt = mode in ("all", "options")
+        shuffle_q = mode in (
+            "all",
+            "questions"
+        )
+
+        shuffle_opt = mode in (
+            "all",
+            "options"
+        )
 
         with get_db() as db:
 
@@ -558,17 +647,16 @@ async def handle_callback_query(
                 quiz_code
             )
 
-            if quiz and quiz.creator.telegram_id == user.id:
+            if (
+                quiz
+                and quiz.creator.telegram_id == user.id
+            ):
 
                 quiz.shuffle_questions = shuffle_q
                 quiz.shuffle_options = shuffle_opt
 
                 db.commit()
                 db.refresh(quiz)
-
-                await query.answer(
-                    "Shuffle settings updated!"
-                )
 
                 try:
                     await query.message.delete()
@@ -588,21 +676,26 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 10. EDIT MARKING MENU
+    # 14. EDIT MARKING MENU
     # =========================================================
 
     elif data.startswith("edit_marking:"):
 
-        quiz_code = data.split(":", 1)[1]
+        quiz_code = data.split(
+            ":",
+            1
+        )[1]
 
         from app.bot.keyboards.inline import (
             get_edit_marking_keyboard
         )
 
         try:
+
             await query.edit_message_text(
                 text=(
-                    "⚖️ *Choose a new marking scheme for this quiz:*\n\n"
+                    "⚖️ *Choose a new marking scheme "
+                    "for this quiz:*\n\n"
                     "• *🎯 NEET Marking*: "
                     "+4 Correct, -1 Wrong, 0 Skipped\n"
                     "• *🏥 NORCET Marking*: "
@@ -615,7 +708,9 @@ async def handle_callback_query(
                     quiz_code
                 )
             )
+
         except Exception as e:
+
             logger.exception(
                 f"Failed to open edit marking menu: {e}"
             )
@@ -623,7 +718,7 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 11. EDIT MARKING
+    # 15. EDIT MARKING
     # =========================================================
 
     elif data.startswith("ed_mk:"):
@@ -636,8 +731,10 @@ async def handle_callback_query(
         quiz_code = parts[1]
 
         try:
+
             correct = float(parts[2])
             wrong = float(parts[3])
+
         except ValueError:
             return
 
@@ -648,17 +745,16 @@ async def handle_callback_query(
                 quiz_code
             )
 
-            if quiz and quiz.creator.telegram_id == user.id:
+            if (
+                quiz
+                and quiz.creator.telegram_id == user.id
+            ):
 
                 quiz.correct_marks = correct
                 quiz.wrong_marks = wrong
 
                 db.commit()
                 db.refresh(quiz)
-
-                await query.answer(
-                    "Marking scheme updated!"
-                )
 
                 try:
                     await query.message.delete()
@@ -678,21 +774,26 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 12. DELETE QUIZ MENU
+    # 16. DELETE QUIZ MENU
     # =========================================================
 
     elif data.startswith("del_quiz:"):
 
-        quiz_code = data.split(":", 1)[1]
+        quiz_code = data.split(
+            ":",
+            1
+        )[1]
 
         from app.bot.keyboards.inline import (
             get_delete_confirm_keyboard
         )
 
         try:
+
             await query.edit_message_text(
                 text=(
-                    "⚠️ *Are you sure you want to delete this quiz?*\n"
+                    "⚠️ *Are you sure you want to "
+                    "delete this quiz?*\n"
                     "This action cannot be undone."
                 ),
                 parse_mode=ParseMode.MARKDOWN,
@@ -700,7 +801,9 @@ async def handle_callback_query(
                     quiz_code
                 )
             )
+
         except Exception as e:
+
             logger.exception(
                 f"Failed to open delete menu: {e}"
             )
@@ -708,12 +811,15 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 13. DELETE CONFIRM
+    # 17. DELETE CONFIRM
     # =========================================================
 
     elif data.startswith("del_confirm:"):
 
-        quiz_code = data.split(":", 1)[1]
+        quiz_code = data.split(
+            ":",
+            1
+        )[1]
 
         with get_db() as db:
 
@@ -722,32 +828,42 @@ async def handle_callback_query(
                 quiz_code
             )
 
-            if quiz and quiz.creator.telegram_id == user.id:
+            if (
+                quiz
+                and quiz.creator.telegram_id == user.id
+            ):
 
                 db.delete(quiz)
                 db.commit()
 
-                await query.edit_message_text(
-                    "🗑 *Quiz has been deleted successfully.*",
-                    parse_mode=ParseMode.MARKDOWN
-                )
+                try:
+
+                    await query.edit_message_text(
+                        "🗑 *Quiz has been deleted successfully.*",
+                        parse_mode=ParseMode.MARKDOWN
+                    )
+
+                except Exception:
+                    pass
 
             else:
 
-                await query.answer(
-                    "Could not delete quiz.",
-                    show_alert=True
+                await chat.send_message(
+                    "⚠️ Could not delete quiz."
                 )
 
         return
 
     # =========================================================
-    # 14. BACK TO QUIZ
+    # 18. BACK TO QUIZ
     # =========================================================
 
     elif data.startswith("back_to_quiz:"):
 
-        quiz_code = data.split(":", 1)[1]
+        quiz_code = data.split(
+            ":",
+            1
+        )[1]
 
         with get_db() as db:
 
@@ -776,21 +892,26 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 15. START PRIVATE QUIZ ATTEMPT
+    # 19. START PRIVATE QUIZ ATTEMPT
     # =========================================================
 
     elif data.startswith("start_attempt:"):
 
-        quiz_code = data.split(":", 1)[1]
+        quiz_code = data.split(
+            ":",
+            1
+        )[1]
 
         with get_db() as db:
 
-            attempt, status = AttemptService.start_attempt(
-                db=db,
-                telegram_user_id=user.id,
-                quiz_code=quiz_code,
-                username=user.username,
-                first_name=user.first_name
+            attempt, status = (
+                AttemptService.start_attempt(
+                    db=db,
+                    telegram_user_id=user.id,
+                    quiz_code=quiz_code,
+                    username=user.username,
+                    first_name=user.first_name
+                )
             )
 
         if status != "SUCCESS" or not attempt:
@@ -799,6 +920,7 @@ async def handle_callback_query(
                 "⚠️ Could not start quiz. "
                 "It may have no questions or be unavailable."
             )
+
             return
 
         await chat.send_message(
@@ -815,7 +937,7 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 16. GROUP QUIZ
+    # 20. GROUP QUIZ
     # =========================================================
 
     elif (
@@ -833,7 +955,10 @@ async def handle_callback_query(
             deliver_group_question
         )
 
-        quiz_code = data.split(":", 1)[1]
+        quiz_code = data.split(
+            ":",
+            1
+        )[1]
 
         chat_data = context.chat_data
 
@@ -847,26 +972,29 @@ async def handle_callback_query(
 
         ready_users.add(user.id)
 
-        ready_count = len(ready_users)
+        ready_count = len(
+            ready_users
+        )
 
         # Update ready button count
         try:
+
             await query.edit_message_reply_markup(
                 reply_markup=get_group_ready_keyboard(
                     quiz_code,
                     ready_count
                 )
             )
+
         except Exception:
             pass
 
         # Countdown already started
         if chat_data.get(countdown_key):
 
-            await query.answer(
+            await chat.send_message(
                 f"✋ You are ready! "
-                f"({ready_count} participants ready)",
-                show_alert=False
+                f"({ready_count} participants ready)"
             )
 
             return
@@ -874,9 +1002,8 @@ async def handle_callback_query(
         # Start countdown
         chat_data[countdown_key] = True
 
-        await query.answer(
-            "✋ You are ready! Starting countdown...",
-            show_alert=False
+        await chat.send_message(
+            "✋ You are ready! Starting countdown..."
         )
 
         with get_db() as db:
@@ -919,6 +1046,7 @@ async def handle_callback_query(
         for remaining in [3, 2, 1]:
 
             try:
+
                 await query.edit_message_text(
                     text=(
                         f"🎲 *Get ready for the quiz: "
@@ -930,6 +1058,7 @@ async def handle_callback_query(
                     ),
                     parse_mode=ParseMode.MARKDOWN
                 )
+
             except Exception:
                 pass
 
@@ -963,12 +1092,15 @@ async def handle_callback_query(
         return
 
     # =========================================================
-    # 17. QUIZ STATISTICS
+    # 21. QUIZ STATISTICS
     # =========================================================
 
     elif data.startswith("stats:"):
 
-        quiz_code = data.split(":", 1)[1]
+        quiz_code = data.split(
+            ":",
+            1
+        )[1]
 
         with get_db() as db:
 
@@ -1007,8 +1139,13 @@ async def handle_callback_query(
                     2
                 )
 
-                high_score = max(scores)
-                low_score = min(scores)
+                high_score = max(
+                    scores
+                )
+
+                low_score = min(
+                    scores
+                )
 
             else:
 
@@ -1049,9 +1186,10 @@ async def handle_callback_query(
         )
 
         try:
-            await query.answer(
-                "This button is no longer available.",
-                show_alert=True
+
+            await chat.send_message(
+                "⚠️ This button is no longer available."
             )
+
         except Exception:
             pass
