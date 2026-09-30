@@ -1,19 +1,28 @@
-﻿"""Quiz Attempt and Answer repository."""
+"""Quiz Attempt and Answer repository."""
 
 from datetime import datetime
 from typing import Any, Dict, List, Optional, Tuple
+
 from sqlalchemy.orm import Session
-from app.database.models.attempt import QuizAttempt, AttemptQuestion, AttemptAnswer
+
+from app.database.models.attempt import (
+    QuizAttempt,
+    AttemptQuestion,
+    AttemptAnswer,
+)
+
 
 class AttemptRepository:
+
     @staticmethod
     def create_attempt(
         db: Session,
         quiz_id: int,
         user_id: int,
         ordered_question_ids: List[int],
-        option_mappings: Dict[int, Dict[str, Any]]
+        option_mappings: Dict[int, Dict[str, Any]],
     ) -> QuizAttempt:
+
         attempt = QuizAttempt(
             quiz_id=quiz_id,
             user_id=user_id,
@@ -23,56 +32,86 @@ class AttemptRepository:
             correct_count=0,
             wrong_count=0,
             unattempted_count=0,
-            started_at=datetime.utcnow()
+            started_at=datetime.utcnow(),
         )
+
         db.add(attempt)
         db.flush()
 
         for pos, qid in enumerate(ordered_question_ids):
+
             mapping = option_mappings.get(qid)
+
             aq = AttemptQuestion(
                 attempt_id=attempt.id,
                 question_id=qid,
                 display_position=pos,
-                option_mapping=mapping
+                option_mapping=mapping,
             )
+
             db.add(aq)
 
         db.flush()
+
         return attempt
 
     @staticmethod
-    def get_by_id(db: Session, attempt_id: int) -> Optional[QuizAttempt]:
-        return db.query(QuizAttempt).filter(QuizAttempt.id == attempt_id).first()
+    def get_by_id(
+        db: Session,
+        attempt_id: int,
+    ) -> Optional[QuizAttempt]:
+
+        return (
+            db.query(QuizAttempt)
+            .filter(QuizAttempt.id == attempt_id)
+            .first()
+        )
 
     @staticmethod
-    def get_active_attempt(db: Session, user_id: int) -> Optional[QuizAttempt]:
+    def get_active_attempt(
+        db: Session,
+        user_id: int,
+    ) -> Optional[QuizAttempt]:
+
         return (
             db.query(QuizAttempt)
             .filter(
                 QuizAttempt.user_id == user_id,
-                QuizAttempt.status == "IN_PROGRESS"
+                QuizAttempt.status == "IN_PROGRESS",
             )
-            .order_by(QuizAttempt.started_at.desc())
+            .order_by(
+                QuizAttempt.started_at.desc()
+            )
             .first()
         )
 
     @staticmethod
-    def get_attempt_question(db: Session, attempt_id: int, display_position: int) -> Optional[AttemptQuestion]:
+    def get_attempt_question(
+        db: Session,
+        attempt_id: int,
+        display_position: int,
+    ) -> Optional[AttemptQuestion]:
+
         return (
             db.query(AttemptQuestion)
             .filter(
                 AttemptQuestion.attempt_id == attempt_id,
-                AttemptQuestion.display_position == display_position
+                AttemptQuestion.display_position == display_position,
             )
             .first()
         )
 
     @staticmethod
-    def get_attempt_question_by_poll_id(db: Session, poll_id: str) -> Optional[AttemptQuestion]:
+    def get_attempt_question_by_poll_id(
+        db: Session,
+        poll_id: str,
+    ) -> Optional[AttemptQuestion]:
+
         return (
             db.query(AttemptQuestion)
-            .filter(AttemptQuestion.telegram_poll_id == poll_id)
+            .filter(
+                AttemptQuestion.telegram_poll_id == poll_id
+            )
             .first()
         )
 
@@ -82,14 +121,23 @@ class AttemptRepository:
         attempt_question_id: int,
         poll_id: str,
         message_id: Optional[int] = None,
-        deadline: Optional[datetime] = None
+        deadline: Optional[datetime] = None,
     ) -> None:
-        aq = db.query(AttemptQuestion).filter(AttemptQuestion.id == attempt_question_id).first()
+
+        aq = (
+            db.query(AttemptQuestion)
+            .filter(
+                AttemptQuestion.id == attempt_question_id
+            )
+            .first()
+        )
+
         if aq:
             aq.telegram_poll_id = poll_id
             aq.telegram_message_id = message_id
             aq.sent_at = datetime.utcnow()
             aq.deadline = deadline
+
             db.flush()
 
     @staticmethod
@@ -100,17 +148,18 @@ class AttemptRepository:
         selected_option: Optional[int],
         is_correct: bool,
         marks_awarded: float,
-        status: str = "ANSWERED"
+        status: str = "ANSWERED",
     ) -> Tuple[AttemptAnswer, bool]:
-        """Record an answer idempotently. Returns (answer, is_new_answer)."""
+
         existing = (
             db.query(AttemptAnswer)
             .filter(
                 AttemptAnswer.attempt_id == attempt_id,
-                AttemptAnswer.question_id == question_id
+                AttemptAnswer.question_id == question_id,
             )
             .first()
         )
+
         if existing:
             return existing, False
 
@@ -121,39 +170,152 @@ class AttemptRepository:
             is_correct=is_correct,
             marks_awarded=marks_awarded,
             answered_at=datetime.utcnow(),
-            status=status
+            status=status,
         )
+
         db.add(answer)
 
-        # Update attempt stats
-        attempt = db.query(QuizAttempt).filter(QuizAttempt.id == attempt_id).first()
+        attempt = (
+            db.query(QuizAttempt)
+            .filter(
+                QuizAttempt.id == attempt_id
+            )
+            .first()
+        )
+
         if attempt:
+
             attempt.score += marks_awarded
-            if status == "TIMEOUT" or status == "UNATTEMPTED":
+
+            if status in (
+                "TIMEOUT",
+                "UNATTEMPTED",
+            ):
                 attempt.unattempted_count += 1
+
             elif is_correct:
                 attempt.correct_count += 1
+
             else:
                 attempt.wrong_count += 1
+
             attempt.current_question_index += 1
 
         db.flush()
+
         return answer, True
 
     @staticmethod
-    def complete_attempt(db: Session, attempt_id: int) -> Optional[QuizAttempt]:
-        attempt = db.query(QuizAttempt).filter(QuizAttempt.id == attempt_id).first()
+    def complete_attempt(
+        db: Session,
+        attempt_id: int,
+    ) -> Optional[QuizAttempt]:
+
+        attempt = (
+            db.query(QuizAttempt)
+            .filter(
+                QuizAttempt.id == attempt_id
+            )
+            .first()
+        )
+
         if attempt:
+
             attempt.status = "COMPLETED"
             attempt.completed_at = datetime.utcnow()
+
             db.flush()
+
         return attempt
 
     @staticmethod
-    def abandon_attempt(db: Session, attempt_id: int) -> Optional[QuizAttempt]:
-        attempt = db.query(QuizAttempt).filter(QuizAttempt.id == attempt_id).first()
+    def stop_attempt(
+        db: Session,
+        attempt_id: int,
+    ) -> Optional[QuizAttempt]:
+        """
+        Immediately stop an active quiz.
+
+        All unanswered questions are recorded as UNATTEMPTED,
+        their configured marks are applied, and the attempt is
+        completed.
+        """
+
+        attempt = (
+            db.query(QuizAttempt)
+            .filter(
+                QuizAttempt.id == attempt_id
+            )
+            .first()
+        )
+
+        if not attempt:
+            return None
+
+        if attempt.status != "IN_PROGRESS":
+            return attempt
+
+        quiz = attempt.quiz
+
+        # Find already answered questions
+        answered_question_ids = {
+            answer.question_id
+            for answer in attempt.answers
+        }
+
+        # Mark remaining questions as unattempted
+        for aq in attempt.questions:
+
+            if aq.question_id in answered_question_ids:
+                continue
+
+            answer = AttemptAnswer(
+                attempt_id=attempt.id,
+                question_id=aq.question_id,
+                selected_option=None,
+                is_correct=False,
+                marks_awarded=quiz.unattempted_marks,
+                answered_at=datetime.utcnow(),
+                status="UNATTEMPTED",
+            )
+
+            db.add(answer)
+
+            attempt.score += quiz.unattempted_marks
+            attempt.unattempted_count += 1
+
+        # Move index to the end
+        attempt.current_question_index = len(
+            attempt.questions
+        )
+
+        # Complete the attempt
+        attempt.status = "COMPLETED"
+        attempt.completed_at = datetime.utcnow()
+
+        db.flush()
+
+        return attempt
+
+    @staticmethod
+    def abandon_attempt(
+        db: Session,
+        attempt_id: int,
+    ) -> Optional[QuizAttempt]:
+
+        attempt = (
+            db.query(QuizAttempt)
+            .filter(
+                QuizAttempt.id == attempt_id
+            )
+            .first()
+        )
+
         if attempt:
+
             attempt.status = "ABANDONED"
             attempt.completed_at = datetime.utcnow()
+
             db.flush()
+
         return attempt
