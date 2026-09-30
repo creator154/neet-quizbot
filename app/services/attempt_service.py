@@ -2,7 +2,7 @@
 
 import random
 from datetime import datetime, timedelta
-from typing import Any, Dict, List, Optional, Tuple
+from typing import Any, Dict, Optional, Tuple
 
 from sqlalchemy.orm import Session
 
@@ -52,7 +52,6 @@ class AttemptService:
         if not questions:
             return None, "NO_QUESTIONS"
 
-        # Abandon previous active attempt
         active_attempt = AttemptRepository.get_active_attempt(
             db,
             user.id,
@@ -64,13 +63,11 @@ class AttemptService:
                 active_attempt.id,
             )
 
-        # Question ordering
         question_ids = [q.id for q in questions]
 
         if quiz.shuffle_questions:
             random.shuffle(question_ids)
 
-        # Option mapping
         option_mappings: Dict[int, Dict[str, Any]] = {}
 
         for q in questions:
@@ -189,7 +186,6 @@ class AttemptService:
             for i in display_to_orig
         ]
 
-        # Calculate deadline
         deadline = None
 
         if (
@@ -306,16 +302,12 @@ class AttemptService:
             == aq.question.correct_option_id
         )
 
-        marks = (
-            ScoringService.evaluate_single_answer(
-                is_correct=is_correct,
-                is_timeout=False,
-                correct_marks=quiz.correct_marks,
-                wrong_marks=quiz.wrong_marks,
-                unattempted_marks=(
-                    quiz.unattempted_marks
-                ),
-            )
+        marks = ScoringService.evaluate_single_answer(
+            is_correct=is_correct,
+            is_timeout=False,
+            correct_marks=quiz.correct_marks,
+            wrong_marks=quiz.wrong_marks,
+            unattempted_marks=quiz.unattempted_marks,
         )
 
         answer, is_new = (
@@ -338,12 +330,6 @@ class AttemptService:
                 False,
                 attempt,
             )
-
-        # Do NOT complete the quiz here.
-        #
-        # The current poll timer must finish first.
-        # The timeout job handles moving to the next
-        # question after the timer expires.
 
         return (
             answer,
@@ -402,7 +388,6 @@ class AttemptService:
         )
 
         if not is_new:
-
             return (
                 answer,
                 attempt.status == "COMPLETED",
@@ -415,7 +400,6 @@ class AttemptService:
         )
 
         if is_complete:
-
             AttemptRepository.complete_attempt(
                 db,
                 attempt.id,
@@ -437,14 +421,6 @@ class AttemptService:
         Optional[QuizAttempt],
         Optional[str],
     ]:
-        """
-        Immediately stop the user's active quiz.
-
-        All unanswered questions are recorded as
-        UNATTEMPTED and their configured marks are
-        applied. The attempt is then completed and
-        returned so the caller can send the result.
-        """
 
         user = UserRepository.get_by_telegram_id(
             db,
@@ -474,7 +450,3 @@ class AttemptService:
         db.commit()
 
         return attempt, "SUCCESS"
-
-Iske saath jo "AttemptRepository.stop_attempt()" maine pichhle message me diya tha, woh bhi hona zaroori hai. Sirf "attempt_service.py" replace karne se "/stop" ka result nahi aayega.
-
-Aur ek important baat: "/stop" command ka handler bhi change karna padega, kyunki wahi "stop_attempt()" ko call karke final result message bhejega. Tum "/stop" wali current handler file bhej do, main usko bhi complete ready-to-paste ".py" bana dunga.
