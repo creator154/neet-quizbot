@@ -6,7 +6,7 @@
 [![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15+-336791.svg)](https://www.postgresql.org/)
 [![SQLAlchemy 2.0](https://img.shields.io/badge/SQLAlchemy-2.0+-red.svg)](https://www.sqlalchemy.org/)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](LICENSE)
-
+[![Deploy To Heroku](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com/deploy?template=https://github.com/creator154/neet-quizbot.git)
 A clean, modular, production-ready Telegram QuizBot engine built with **Python 3.11**, **python-telegram-bot**, **PostgreSQL**, and **SQLAlchemy 2.0**.
 
 This framework independently reproduces the publicly observable workflow and user experience of Telegram'\''s `@QuizBot` using official Telegram Bot API mechanisms, tailored specifically for competitive exams like **NEET** (+4 for correct, -1 for wrong, 0 for unattempted).
