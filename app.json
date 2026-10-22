@@ -1,0 +1,73 @@
+
+{
+  "name": "NEET QuizBot",
+  "description": "Telegram QuizBot for NEET preparation",
+  "repository": "https://github.com/creator154/neet-quizbot",
+  "keywords": [
+    "telegram",
+    "quizbot",
+    "neet"
+  ],
+  "stack": "heroku-24",
+  "buildpacks": [
+    {
+      "url": "heroku/python"
+    }
+  ],
+  "env": {
+    "BOT_TOKEN": {
+      "description": "Telegram bot token from BotFather",
+      "required": true
+    },
+    "DATABASE_URL": {
+      "description": "PostgreSQL database connection URL",
+      "required": true
+    },
+    "BOT_USERNAME": {
+      "description": "Bot username without @",
+      "required": true
+    },
+    "ADMIN_USER_IDS": {
+      "description": "Telegram numeric user ID of the admin",
+      "required": true
+    },
+    "OWNER_USERNAME": {
+      "description": "Owner Telegram username without @",
+      "required": true
+    },
+    "SUPPORT_URL": {
+      "description": "Support channel or group URL",
+      "required": false,
+      "value": ""
+    },
+    "DEFAULT_LANGUAGE": {
+      "description": "Default bot language",
+      "value": "hi",
+      "required": false
+    },
+    "ENVIRONMENT": {
+      "description": "Application environment",
+      "value": "production",
+      "required": false
+    },
+    "DEBUG": {
+      "description": "Enable SQL debug logging",
+      "value": "False",
+      "required": false
+    },
+    "WEBHOOK_URL": {
+      "description": "Leave blank for polling mode",
+      "value": "",
+      "required": false
+    }
+  },
+  "formation": {
+    "worker": {
+      "quantity": 1,
+      "size": "basic"
+    },
+    "web": {
+      "quantity": 0
+    }
+  }
+}
