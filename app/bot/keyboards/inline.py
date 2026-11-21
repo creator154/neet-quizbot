@@ -27,7 +27,7 @@ def get_start_keyboard(bot_username: str = "", lang: str = "en") -> InlineKeyboa
         [
             InlineKeyboardButton(
                 "Developer",
-                url="https://t.me/SumitTripathi"
+                url="https://t.me/HeySumit"
             ),
             InlineKeyboardButton(
                 "Help",
